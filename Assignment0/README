@@ -1,0 +1,3 @@
+The create_hostfile.sh script is used to create a hostfile. It uses ping command
+to send a single packet to the destination node and depending upon the exit code
+, creates the mpich.hostfile file.
