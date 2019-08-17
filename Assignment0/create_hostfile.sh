@@ -18,5 +18,5 @@ check_host () {
 }
 
 echo "# This is an automatically created hostfile using create_hostfile.sh script" > ${hostfile_name}
-for i in `seq 50`; do check_host ${i} & done
+for i in `seq 27 39`; do check_host ${i} & done
 

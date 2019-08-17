@@ -1,0 +1,6 @@
+**mpich.hostfile
+*.swp
+*.swq
+*.o
+*.x
+
