@@ -13,4 +13,4 @@ all: src.x
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm *.o *.x
+	rm *.o *.x *.png data.txt *.hostfile

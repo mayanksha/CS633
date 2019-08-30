@@ -8,7 +8,7 @@ long sizes[5] = {128, 1024, 65536, 1048576, 4194304};
 int main( int argc, char *argv[])
 {
   int myrank, size;
-  double start_time, elapsed_time, bandwidth;
+  double start_time, elapsed_time;
   MPI_Status status;
   // MPI_Request request[];
 
@@ -32,6 +32,7 @@ int main( int argc, char *argv[])
               MPI_Send(arr, num_bytes, MPI_BYTE, 1, 0, MPI_COMM_WORLD);
           }
       } else if (myrank == 1) {
+          double bandwidth;
           char recvarr[num_bytes];
           for (size_t i = 0; i < 100; i++) {
               MPI_Recv(recvarr, num_bytes, MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -46,13 +47,11 @@ int main( int argc, char *argv[])
 
           elapsed_time =  MPI_Wtime() - start_time;
           bandwidth = 100 *  (num_bytes / (1024.0 * 1024.0)) / elapsed_time;
-          printf ("n_bytes = %ld, time = %lf, bandwidth = %lf MBps\n", num_bytes, elapsed_time, bandwidth);
+          // printf ("n_bytes = %ld, time = %lf, bandwidth = %lf MBps\n", num_bytes, elapsed_time, bandwidth);
+          printf ("%lf\n", bandwidth);
       }
-
       free (arr);
   }
-
-
   MPI_Finalize();
   return 0;
 }
