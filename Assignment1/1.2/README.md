@@ -12,5 +12,3 @@ When we look at the data when we run 4 processes on 8 different nodes, we see a 
 
 Also, the graphs suggest that the values for blocking send/recv is lesser than non-blocking Isend/Irecv. This is because blocking calls must have a paired up send-recv and then only the other send/recv can carry forward. On the other hand, for Isend/Irecv, the data sending and receving part can purely happen in the background and no call waits for others to finish. Hence, the bandwidth is higher.
 
-### For Blocking calls
-
