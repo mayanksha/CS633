@@ -121,8 +121,8 @@ ax[1].set_xticklabels(xtick_names)
 for tick in ax[1].xaxis.get_major_ticks():
     tick.label.set_fontsize(12)
 
-fig1.savefig('./blocking-plot.png')
-fig2.savefig('./non-blocking-plot.png')
-fig.savefig('./plot.png')
+fig1.savefig('./blocking-plot.jpg')
+fig2.savefig('./non-blocking-plot.jpg')
+fig.savefig('./plot.jpg')
 
 plt.show()
