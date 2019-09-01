@@ -1,0 +1,8 @@
+Blocking 94.272375
+Blocking 190.328847
+Blocking 114.844350
+Blocking 130.926093
+Non-Blocking 200.601693
+Non-Blocking 184.776869
+Non-Blocking 187.214194
+Non-Blocking 187.966749
