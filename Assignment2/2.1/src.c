@@ -9,10 +9,6 @@
 #define NUM_NODES 30
 #define ENV_ENABLE_FILTER "ENABLE_FILTER"
 
-/* 64 KB, 512 KB, 2 MB */
-/* long bytes[3] = {65536, 524288, 2097152}; */
-long bytes[1] = {524288};
-
 struct Times {
     double start;
     double end;
