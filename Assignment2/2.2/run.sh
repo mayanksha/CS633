@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -x
-data_sizes=(65536 524288 2097152)
+proc_sizes=(8 16 32)
+ppn=(2 4 8)
+data_sizes=(65536 262144 524288 2097152 4194304)
 # data_sizes=(65536)
 # Remove the older data files
 make clean 2>&1 > /dev/null
@@ -21,30 +23,28 @@ then
     exit -1
 fi
 
-# Truncate the data file
-for i in "${data_sizes[@]}"
+for i in "${proc_sizes[@]}"
 do
-    time_now=$(date +%R@%F)
-    filtered_name="./data/filtered-data-${i}B-${time_now}"
-    unfiltered_name="./data/unfiltered-data-${i}B-${time_now}"
-
-    printf "" > $filtered_name
-    printf "" > $unfiltered_name
-
-    export ENABLE_FILTER=1
-    mpiexec -f ./mpich.hostfile -ppn 1 ./src.x ${i} >> "$filtered_name"
-    if [ $? -ne 0 ]
-    then
-        echo "mpiexec command failed!"
-        exit -1
-    fi
-
-    unset ENABLE_FILTER
-    mpiexec -f mpich.hostfile -ppn 1 ./src.x ${i} >> "$unfiltered_name"
-    if [ $? -ne 0 ]
-    then
-        echo "mpiexec command failed!"
-        exit -1
-    fi
+    # time_now=$(date +%R@%F)
+    filename="./data/data-NP-${i}"
+    printf "" > $filename
+    for j in "${ppn[@]}"
+    do
+        for k in "${data_sizes[@]}"
+        do
+            for l in `seq 10`
+            do
+                out=$(mpiexec -f ./mpich.hostfile -ppn ${j} -np ${i} ./src.x ${k})
+                printf "${k},${j},${out},${i}\n" >> ${filename}
+                if [ $? -ne 0 ]
+                then
+                    echo "mpiexec command failed!"
+                    exit -1
+                fi
+            done
+        done
+    done
+    python plot.py ${filename}
+    echo "Plotted graphs for P=${i}"
 done
 exit 0
