@@ -9,16 +9,6 @@
 #define ENV_ENABLE_FILTER "ENABLE_FILTER"
 
 typedef enum { false, true } bool;
-struct Times {
-    double start;
-    double end;
-};
-
-struct Requests {
-    MPI_Request send;
-    MPI_Request recv;
-};
-
 int main( int argc, char *argv[])
 {
     int myrank, size;
@@ -31,11 +21,6 @@ int main( int argc, char *argv[])
     }
 
     int num_bytes = atoi (argv[1]);
-
-    /* struct Requests requests[NUM_NODES][NUM_NODES];
-     * struct Times times[NUM_NODES][NUM_NODES]; */
-    /* MPI_Status send_statuses[NUM_NODES], recv_statuses[NUM_NODES];  */
-
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -50,6 +35,21 @@ int main( int argc, char *argv[])
     recvarr = malloc (sizeof (char) * num_bytes);
     memset (arr, '0', num_bytes * sizeof(char));
 
+    /* Lets take an example on n = 6 nodes
+       1st Iteration:
+            Nodes (0, 1) (2, 3) (4, 5) will run concurrently, each using MPI_Ssend and MPI_Recv.
+       The timings for each MPI_Ssend is noted (since it's a synchronous send, so timing the Send is enough for timing the whole operation).
+
+       2nd Iteration:
+            Nodes (0, 2) (1, 3) run concurrently.  Now the two remaining nodes can't be run in-parallel to these other running nodes because with wrap-around (i.e (4 + 2) mod 6 = 0), node 4 should have been communication with node 0, and node 5 to node 1. So, I use an MPI_Barrier to separate the transfers between the previous set of nodes and these two.
+
+       3rd Iteration:
+            Nodes (0, 3) (1, 4) (2, 5) run concurrently.
+
+       4th Iteration:
+            Nodes (0, 4) (1, 5) run concurrently. Now, nodes 2 and 3 can't communicate because (2 + 4) mod 6 = 0 which is already communicating with 4, so these communications i.e (2, 0) and (3, 1) are performed after an MPI_Barrier.
+
+       Further iterations carry on like this. At the end, we have a dense matrix of nodes who have had communicated with each other, while there are some pairs which haven't been gone through (because they violated the parallel transfer constraint). */
     for (int i = 1; i < size ; i++) {
         MPI_Status st;
         int receiver = (myrank + i)%size;
@@ -207,15 +207,6 @@ int main( int argc, char *argv[])
         MPI_Request root_req[count];
         MPI_Status root_st[count];
 
-//        if (myrank == 0)
-//            for (int i = 0; i < size; i++) {
-//                printf ("[%d] ", i);
-//                for (int j = 0; j < size; j++) {
-//                    printf ("%lf ", times[i][j]);
-//                }
-//                printf ("\n");
-//            }
-
         if (myrank != 0) {
             MPI_Send (times[myrank], size, MPI_DOUBLE, 0, 99, MPI_COMM_WORLD);
         } else {
@@ -226,17 +217,20 @@ int main( int argc, char *argv[])
         if (myrank == 0) {
             for (int i = 0; i < size; i++) {
                 for (int j= 0; j < size; j++) {
-                    double bw  = ((double) num_bytes / (times[i][j])) / (1024.0 * 1024.0);
+                    double bw;
                     /* We zero-out the bandwidth in the case ENV_ENABLE_FILTER env
                      * variable is set. This is done so as to obtain a better heatmap */
                     if (i == j) {
+                        bw  = ((double) num_bytes / (times[i][j])) / (1024.0 * 1024.0);
                         if (envvar != NULL) {
                             printf ("%d %d %lf\n", i, j, 0.0);
                         } else {
                             printf ("%d %d %lf\n", i, j, bw);
                         }
-                    } else
+                    } else {
+                        bw = ((double) num_bytes / (times[i][j])/ 2.0) / (1024.0 * 1024.0);
                         printf ("%d %d %lf\n", i, j, bw);
+                    }
                 }
             }
         }
