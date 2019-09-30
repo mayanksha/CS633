@@ -13,4 +13,4 @@ all: src.x
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm *.o *.x *.jpg filtered* unfiltered*
+	rm *.o *.x *.jpg data/*

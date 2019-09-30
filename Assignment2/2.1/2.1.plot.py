@@ -28,7 +28,7 @@ file.close();
 
 data = pd.DataFrame({'X': X, 'Y': Y, 'Z': Z})
 data_pivoted = data.pivot("Y", "X", "Z")
-ax = sns.heatmap(data_pivoted, cmap="YlGnBu")
+ax = sns.heatmap(data_pivoted)
 plt.title(sys.argv[1])
 #  plt.savefig("plot.png")
 plt.show()

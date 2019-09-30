@@ -6,12 +6,12 @@ data_sizes=(65536 524288 2097152)
 # Remove the older data files
 make clean 2>&1 > /dev/null
 
-./create_hostfile.sh 1
-if [ $? -ne 0 ]
-then
-    echo "Some problem with create the hostfile! Exiting!"
-    exit -1
-fi
+#./create_hostfile.sh 1
+#if [ $? -ne 0 ]
+#then
+#    echo "Some problem with create the hostfile! Exiting!"
+#    exit -1
+#fi
 
 # Compile the src.c file
 make
