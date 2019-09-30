@@ -24,7 +24,7 @@ ppn_2 = pd.DataFrame({'DataSize': a_2[:, 0], 'ppn': a_2[:,1], 'New_Bcast': a_2[:
 ppn_4 = pd.DataFrame({'DataSize': a_4[:, 0], 'ppn': a_4[:,1], 'New_Bcast': a_4[:, 2], 'MPI_Bcast': a_4[:, 3]})
 ppn_8 = pd.DataFrame({'DataSize': a_8[:, 0], 'ppn': a_8[:,1], 'New_Bcast': a_8[:, 2], 'MPI_Bcast': a_8[:, 3]})
 
-ppn_data = [ppn_2, ppn_4, ppn_8]
+ppn_data = [ppn_8, ppn_4, ppn_2]
 plt.tight_layout()
 fig, ax = plt.subplots(ncols=2, nrows=3)
 fig.set_figheight(24)
