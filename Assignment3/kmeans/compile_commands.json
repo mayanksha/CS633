@@ -1,0 +1,14 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-I/home/msharma/build/local/include",
+            "-o",
+            "src.o",
+            "src.c"
+        ],
+        "directory": "/home/msharma/git/CS633-2019-20-1/Assignment3/kmeans",
+        "file": "src.c"
+    }
+]
