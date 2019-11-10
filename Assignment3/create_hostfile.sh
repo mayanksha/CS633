@@ -39,7 +39,7 @@ do
     wait $job
 done
 
-hosts=$(tail -n30 ${hostfile})
+hosts=$(tail -n15 ${hostfile})
 printf "" > ${hostfile}
 for i in ${hosts[@]}
 do

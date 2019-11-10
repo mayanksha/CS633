@@ -7,7 +7,7 @@ all: build
 build: src.o vector.o
 	$(CC) $(CFLAGS) -o $(OUT) src.c vector.c
 
-debug: CFLAGS+=-DDEBUG CFLAGS+=-DPRINT_POINTS
+debug: CFLAGS+=-DDEBUG
 debug: build
 
 src.o: src.c vector.h
