@@ -1,5 +1,5 @@
 CC=mpicc
-CFLAGS=
+CFLAGS=-O3
 OUT=src.x
 
 all: build

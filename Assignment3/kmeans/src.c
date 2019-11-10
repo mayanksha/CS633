@@ -285,6 +285,11 @@ int main( int argc, char *argv[])
         }
     }
     proc_time = MPI_Wtime () - proc_time;
+    g_time = MPI_Wtime () - g_time;
+
+    printf ("Total: %lf\n", g_time);
+    printf ("Total: %lf\n", proc_time);
+    printf ("Total: %lf\n", pre_time);
     /* Now, we do the final cluster assignments */
     /* if (myrank == 0) {
      *     for (int i = 0; i < klass->N; i++) {
