@@ -1,16 +1,20 @@
-CC      = mpicc
-COPT    = -g -O3
+CC=mpicc
+CFLAGS=-O3
+OUT=src.x
 
-LD      = $(CC)
-LDFLAGS = $(COPT)
+all: build
 
-all: src.x
+build: src.o vector.o
+	$(CC) $(CFLAGS) -o $(OUT) src.c vector.c
 
-%.x: %.o src.o
-	$(LD) $(LDFLAGS) $< -o $@
+debug: CFLAGS+=-DDEBUG CFLAGS+=-DPRINT_POINTS
+debug: build
 
-%.o: %.c 
-	$(CC) $(CFLAGS) -c $< -o $@
+src.o: src.c vector.h
+	$(CC) $(CFLAGS) -c src.c
+
+vector.o: vector.c vector.h
+	$(CC) $(CFLAGS) -c vector.c
 
 clean:
-	rm *.o *.x *.jpg data/*
+	rm -f *.o *.x
