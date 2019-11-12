@@ -20,19 +20,26 @@ then
     exit -1
 fi
 
-mkdir - cse
-dataset_1_path="./data1/"
-dataset_2_path="./data2/"
+mkdir -p cse
+dataset_1_files=`ls ./data1/file*`
+dataset_2_files=`ls ./data2/file*`
 
 n_procs=(1 2 3 4 5 6 7 8 9 10)
 n_hosts=(1 2 3)
+KVal="10"
 # Truncate the data file
 for i in "${n_hosts[@]}"
 do
     for j in "${n_procs[@]}"
     do
-        total_proc=$(( $i * $j ))\n
-        mpiexec -f mpich.hostfile -np "${total_proc}" -ppn "${j}" ./src.x > "cse/output_${total_proc}"
+        total_proc=$(( $i * $j ))
+        out_file="cse/output_${total_proc}.txt"
+        printf "" > "$out_file"
+        for k in "${dataset_1_files[@]}"
+        do
+            mpiexec -f mpich.hostfile -np "${total_proc}" -ppn "${j}" ./src.x "${k}" ${KVal} \
+                >> "${out_file}"
+        done
     done
 done
 exit 0
