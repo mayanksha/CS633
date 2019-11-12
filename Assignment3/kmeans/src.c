@@ -268,11 +268,13 @@ int main( int argc, char *argv[])
         printf ("Total: %lf\n", g_time);
         printf ("Processing: %lf\n", proc_time);
         printf ("Pre-Processing: %lf\n", pre_time);
+        printf("%d, ", klass->K);
         for (int i = 0; i < klass->K; i++) {
-            printf ("%d,%lf,%lf,%lf", c_assgn[i].total,
-                    local_centroids[i].x, local_centroids[i].y, local_centroids[i].z);
-            printf ("\n");
+            printf ("(%lf,%lf,%lf)", local_centroids[i].x, local_centroids[i].y, local_centroids[i].z);
+            if (i != klass->K - 1)
+                printf(", ");
         }
+        printf("\n");
     }
     ret = EXIT_SUCCESS;
 
