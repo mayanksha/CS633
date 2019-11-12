@@ -77,7 +77,8 @@ Point *get_initial_rand_centroids (KMeansClass *klass) {
     assert (centroids != NULL);
 
     for (int i = 0; i < klass->K; i++) {
-        long rand_index = rand() % klass->N;
+        /* long rand_index = rand() % klass->N; */
+        long rand_index = i % klass->N;
         centroids[i].id = klass->data[rand_index].id;
         centroids[i].x = klass->data[rand_index].x;
         centroids[i].y = klass->data[rand_index].y;
@@ -109,6 +110,8 @@ int main( int argc, char *argv[])
         MPI_Abort (MPI_COMM_WORLD, ret);
         return ret;
     }
+    if (myrank == 0)
+        printf ("Number of Processes: %d\n", world_size);
 
     klass->K = atoi (argv[2]);
     vector c_assgn[klass->K];
@@ -155,7 +158,7 @@ int main( int argc, char *argv[])
     }
 
     /* Allocate memory for the receive buffer. You can later change this when you'll
-     * be reading from file at some stride for each process. 
+     * be reading from file at some stride for each process.
      *
      * Note: It only makes sense for allocating this buffer for myrank != 0 processes,
      * but MPI_Scatter doesn't allow NULL buffers. */
@@ -186,6 +189,7 @@ int main( int argc, char *argv[])
     logger ("Starting Scatter!\n");
 
     MPI_Scatter (klass->data, pts_per_proc, point_type, recv_pts, pts_per_proc, point_type, 0, MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 
     if (myrank != 0)
         klass->data = recv_pts;
@@ -202,13 +206,12 @@ int main( int argc, char *argv[])
         logger ("Foo: %d,%lf,%lf,%lf\n", klass->data[3].id, klass->data[3].x, klass->data[3].y, klass->data[3].z);
     }
 #endif
-    float metric = 0.1;
 
     local_clusters = malloc (sizeof(int) * pts_per_proc);
     if (myrank == 0)
         global_clusters = malloc (sizeof(int) * klass->N);
 
-    int iter = 50;
+    int iter = 200;
 
     pre_time = MPI_Wtime () - pre_time;
     proc_time = MPI_Wtime ();
@@ -246,9 +249,9 @@ int main( int argc, char *argv[])
  *         }
  * #endif */
         /* Use global_clusters to re-compute the new centroids */
-        Point new_centroids[klass->K];
+        /* Point local_centroids[klass->K]; */
         for (int i = 0; i < klass->K; i++) {
-            new_centroids[i].x = 0.0; new_centroids[i].y = 0.0; new_centroids[i].z = 0.0;
+            local_centroids[i].x = 0.0; local_centroids[i].y = 0.0; local_centroids[i].z = 0.0;
         }
 
         if (myrank == 0) {
@@ -262,22 +265,22 @@ int main( int argc, char *argv[])
                 int v_size = c_assgn[i].total;
                 for (int j = 0; j < v_size; j++) {
                     int index = vector_get (&c_assgn[i], j);
-                    new_centroids[i].x += klass->data[index].x;
-                    new_centroids[i].y += klass->data[index].y;
-                    new_centroids[i].z += klass->data[index].z;
+                    local_centroids[i].x += klass->data[index].x;
+                    local_centroids[i].y += klass->data[index].y;
+                    local_centroids[i].z += klass->data[index].z;
                 }
-                new_centroids[i].x /= v_size;
-                new_centroids[i].y /= v_size;
-                new_centroids[i].z /= v_size;
+                local_centroids[i].x /= v_size;
+                local_centroids[i].y /= v_size;
+                local_centroids[i].z /= v_size;
             }
         }
 
         MPI_Barrier (MPI_COMM_WORLD);
-        MPI_Bcast (new_centroids, klass->K, point_type, 0, MPI_COMM_WORLD);
-        MPI_Barrier (MPI_COMM_WORLD);
-
-        for (int i = 0; i <klass->K ;i++)
-            local_centroids[i] = new_centroids[i];
+/*         MPI_Bcast (local_centroids, klass->K, point_type, 0, MPI_COMM_WORLD);
+ *         MPI_Barrier (MPI_COMM_WORLD);
+ * 
+ *         for (int i = 0; i <klass->K ;i++)
+ *             local_centroids[i] = local_centroids[i]; */
         iter--;
 
         if (iter != 0 && myrank == 0)
@@ -290,7 +293,7 @@ int main( int argc, char *argv[])
 
     if (myrank == 0) {
         for (int i = 0; i < klass->K; i++) {
-            printf ("[%d]: %d, Mean: (%lf, %lf, %lf)", i, c_assgn[i].total,
+            printf ("%d,%lf,%lf,%lf", c_assgn[i].total,
                     local_centroids[i].x, local_centroids[i].y, local_centroids[i].z);
             printf ("\n");
         }
