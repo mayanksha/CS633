@@ -17,4 +17,4 @@ vector.o: vector.c vector.h
 	$(CC) $(CFLAGS) -c vector.c
 
 clean:
-	rm -f *.o *.x
+	rm -f *.o *.x *.out
