@@ -79,7 +79,6 @@ Point *get_initial_rand_centroids (KMeansClass *klass) {
     for (int i = 0; i < klass->K; i++) {
         /* long rand_index = rand() % klass->N; */
         long rand_index = i % klass->N;
-        centroids[i].id = klass->data[rand_index].id;
         centroids[i].x = klass->data[rand_index].x;
         centroids[i].y = klass->data[rand_index].y;
         centroids[i].z = klass->data[rand_index].z;
@@ -110,9 +109,6 @@ int main( int argc, char *argv[])
         MPI_Abort (MPI_COMM_WORLD, ret);
         return ret;
     }
-    if (myrank == 0)
-        printf ("Number of Processes: %d\n", world_size);
-
     klass->K = atoi (argv[2]);
     vector c_assgn[klass->K];
     c_assgn->capacity = 0;
@@ -141,7 +137,6 @@ int main( int argc, char *argv[])
 
         klass->data = malloc (sizeof (Point) * klass->N);
         for (int i = 0; i < 4 * klass->N; i+=4) {
-            klass->data[i/4].id = data[i];
             klass->data[i/4].x = data[i+1];
             klass->data[i/4].y = data[i+2];
             klass->data[i/4].z = data[i+3];
@@ -166,16 +161,15 @@ int main( int argc, char *argv[])
     assert (recv_pts != NULL);
 
     /* Create a custom MPI Datatype for the Point struct we're sending */
-    int count = 4;
-    int array_of_blocklengths[] = { 1, 1, 1, 1 };
+    int count = 3;
+    int array_of_blocklengths[] = { 1, 1, 1 };
     MPI_Aint array_of_displacements[] = {
-        offsetof(Point, id),
         offsetof(Point, x),
         offsetof(Point, y),
         offsetof(Point, z)
     };
 
-    MPI_Datatype array_of_types[] = { MPI_INT, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE,};
+    MPI_Datatype array_of_types[] = { MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE,};
     MPI_Datatype tmp_type, point_type;
     MPI_Aint lb, extent;
 
@@ -211,7 +205,7 @@ int main( int argc, char *argv[])
     if (myrank == 0)
         global_clusters = malloc (sizeof(int) * klass->N);
 
-    int iter = 200;
+    int iter = 100;
 
     pre_time = MPI_Wtime () - pre_time;
     proc_time = MPI_Wtime ();
@@ -233,23 +227,7 @@ int main( int argc, char *argv[])
 
         MPI_Gather (local_clusters, pts_per_proc, MPI_INT, global_clusters, pts_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
 
-/* #ifdef DEBUG
- *         if (myrank == 0) {
- *             for (int i = 1; i < world_size; i++) {
- *                 for (int j = 0; j < 10; j++) {
- *                     int id = klass->data[i*pts_per_proc + j].id;
- *                     logger ("****: %d, %d\n", id, global_clusters[id - 1]);
- *                 }
- *             }
- *         } else {
- *             for (int j = 0; j < 10; j++) {
- *                 int id = klass->data[j].id;
- *                 logger ("****: %d, %d\n", id, local_clusters[j]);
- *             }
- *         }
- * #endif */
         /* Use global_clusters to re-compute the new centroids */
-        /* Point local_centroids[klass->K]; */
         for (int i = 0; i < klass->K; i++) {
             local_centroids[i].x = 0.0; local_centroids[i].y = 0.0; local_centroids[i].z = 0.0;
         }
@@ -275,12 +253,6 @@ int main( int argc, char *argv[])
             }
         }
 
-        MPI_Barrier (MPI_COMM_WORLD);
-/*         MPI_Bcast (local_centroids, klass->K, point_type, 0, MPI_COMM_WORLD);
- *         MPI_Barrier (MPI_COMM_WORLD);
- * 
- *         for (int i = 0; i <klass->K ;i++)
- *             local_centroids[i] = local_centroids[i]; */
         iter--;
 
         if (iter != 0 && myrank == 0)
@@ -292,22 +264,16 @@ int main( int argc, char *argv[])
     g_time = MPI_Wtime () - g_time;
 
     if (myrank == 0) {
+        printf ("Number of Processes: %d\n", world_size);
+        printf ("Total: %lf\n", g_time);
+        printf ("Processing: %lf\n", proc_time);
+        printf ("Pre-Processing: %lf\n", pre_time);
         for (int i = 0; i < klass->K; i++) {
             printf ("%d,%lf,%lf,%lf", c_assgn[i].total,
                     local_centroids[i].x, local_centroids[i].y, local_centroids[i].z);
             printf ("\n");
         }
-        printf ("Total: %lf\n", g_time);
-        printf ("Processing: %lf\n", proc_time);
-        printf ("Pre-Processing: %lf\n", pre_time);
     }
-    /* Now, we do the final cluster assignments */
-    /* if (myrank == 0) {
-     *     for (int i = 0; i < klass->N; i++) {
-     *         int cluster = get_cluster (&klass->data[i], local_centroids, klass->K);
-     *         global_clusters[i] = cluster;
-     *     }
-     * }   */
     ret = EXIT_SUCCESS;
 
 out:
@@ -327,8 +293,3 @@ out:
     m_free_klass (klass);
     return ret;
 }
-
-/* for (int i = 0; i < klass->N; i+=4)
- *     logger ("%d,%lf,%lf,%lf\n", klass->data[i/4].id, klass->data[i/4].x, klass->data[i/4].y, klass->data[i/4].z);
- * logger ("Actual bytes read = %lu\n", klass->N); */
-

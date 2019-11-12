@@ -14,7 +14,6 @@
  * #define PRINT_POINTS */
 
 typedef struct {
-    int id;
     double x, y, z;
 } Point;
 
