@@ -7,7 +7,7 @@ set -e
 make clean 2>&1 > /dev/null
 
 # Compile the src.c file
-make -f "Makefile.cse"
+make -f "Makefile"
 if [ $? -ne 0 ]
 then
     echo "Some problem with make command! Exiting!"
