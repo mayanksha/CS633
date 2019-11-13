@@ -4,6 +4,7 @@ set -x
 #PBS -N Assignment3
 #PBS -q small
 #PBS -l walltime=10:00:00
+#PBS -l nodes=2:ppn=8
 #PBS -j oe
 export I_MPI_FABRICS=shm:tmi
 export I_MPI_DEVICE=rdma:OpenIB-cma
@@ -25,10 +26,9 @@ then
     exit -1
 fi
 
-rm -rf hpc/*
 data_folders=("data1" "data2")
 
-n_hosts=(1 2 4 8 16 32)
+n_hosts=(1 2 4 8 16)
 # Truncate the data file
 
 for data_folder in "${data_folders[@]}"

@@ -77,8 +77,8 @@ Point *get_initial_rand_centroids (KMeansClass *klass) {
     assert (centroids != NULL);
 
     for (int i = 0; i < klass->K; i++) {
-        /* long rand_index = rand() % klass->N; */
-        long rand_index = i % klass->N;
+        long rand_index = rand() % klass->N;
+        /* long rand_index = i % klass->N; */
         centroids[i].x = klass->data[rand_index].x;
         centroids[i].y = klass->data[rand_index].y;
         centroids[i].z = klass->data[rand_index].z;
