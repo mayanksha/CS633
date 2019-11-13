@@ -1,20 +1,31 @@
 #!/bin/bash
 
 set -x
-set -e
-# data_sizes=(65536)
+#PBS -N Assignment3
+#PBS -q small
+#PBS -l walltime=10:00:00
+#PBS -j oe
+export I_MPI_FABRICS=shm:tmi
+export I_MPI_DEVICE=rdma:OpenIB-cma
+
+#change directory to where the job has been submitted from
+cd $PBS_O_WORKDIR
+#source paths
+source /opt/software/intel17_update4/initpaths intel64
+#sort hostnames
+sort $PBS_NODEFILE > hostfile
 # Remove the older data files
-make clean 2>&1 > /dev/null
+make -f "Makefile.hpc" clean 2>&1 > /dev/null
 
 # Compile the src.c file
-make -f "Makefile"
+make -f "Makefile.hpc"
 if [ $? -ne 0 ]
 then
     echo "Some problem with make command! Exiting!"
     exit -1
 fi
 
-rm -rf cse/*
+rm -rf hpc/*
 data_folders=("data1" "data2")
 
 n_procs=(1 2 3 4 8 12)
@@ -37,9 +48,9 @@ do
         for j in "${n_procs[@]}"
         do
             total_proc=$(( $i * $j ))
-            mkdir -p "./cse/${data_folder}/"
-            temp_out_file="./cse/${data_folder}/temp_output_${total_proc}.txt"
-            out_file="./cse/${data_folder}/output_${total_proc}.txt"
+            mkdir -p "./hpc/${data_folder}/"
+            temp_out_file="./hpc/${data_folder}/temp_output_${total_proc}.txt"
+            out_file="./hpc/${data_folder}/output_${total_proc}.txt"
             printf "" > "$temp_out_file"
             printf "" > "$out_file"
             echo "$temp_out_file"
@@ -48,7 +59,7 @@ do
 
             for k in "${dataset_files[@]}"
             do
-                mpiexec -f mpich.hostfile -np "${total_proc}" -ppn "${j}" ./src.x "${k}" ${KVal} >> "${temp_out_file}"
+                mpiexec -f "hostfile" -np "${total_proc}" -ppn "${j}" ./src.x "${k}" ${KVal} >> "${temp_out_file}"
             done
 
             head -n1 "${temp_out_file}" >> "${out_file}"

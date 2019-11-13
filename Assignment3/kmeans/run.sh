@@ -4,7 +4,7 @@ set -x
 set -e
 # data_sizes=(65536)
 # Remove the older data files
-make clean 2>&1 > /dev/null
+make -f "Makefile.cse" clean 2>&1 > /dev/null
 
 # Compile the src.c file
 make -f "Makefile.cse"
