@@ -28,8 +28,7 @@ fi
 rm -rf hpc/*
 data_folders=("data1" "data2")
 
-n_procs=(1 2 3 4 8 12)
-n_hosts=(1 2 3)
+n_hosts=(1 2 4 8 16 32)
 # Truncate the data file
 
 for data_folder in "${data_folders[@]}"
@@ -45,12 +44,13 @@ do
     dataset_files=($(ls ./${data_folder}/file*))
     for i in "${n_hosts[@]}"
     do
-        for j in "${n_procs[@]}"
+        total_proc=$(( $i ))
+        mkdir -p "./hpc/${data_folder}/"
+
+        for n_iter in `seq 5`
         do
-            total_proc=$(( $i * $j ))
-            mkdir -p "./hpc/${data_folder}/"
-            temp_out_file="./hpc/${data_folder}/temp_output_${total_proc}.txt"
-            out_file="./hpc/${data_folder}/output_${total_proc}.txt"
+            temp_out_file="./hpc/${data_folder}/temp_output_${total_proc}_${n_iter}"
+            out_file="./hpc/${data_folder}/output_${total_proc}_${n_iter}"
             printf "" > "$temp_out_file"
             printf "" > "$out_file"
             echo "$temp_out_file"
@@ -59,7 +59,7 @@ do
 
             for k in "${dataset_files[@]}"
             do
-                mpiexec -f "hostfile" -np "${total_proc}" -ppn "${j}" ./src.x "${k}" ${KVal} >> "${temp_out_file}"
+                mpiexec -f mpich.hostfile -np "${total_proc}" -ppn "8" ./src.x "${k}" ${KVal} >> "${temp_out_file}"
             done
 
             head -n1 "${temp_out_file}" >> "${out_file}"
@@ -74,6 +74,7 @@ do
             echo "Total Time: ${total_avg}">> "${out_file}"
             echo "Processing Time: ${proc_avg}">> "${out_file}"
             echo "Pre-Processing Time: ${pre_proc_avg}">> "${out_file}"
+
         done
     done
 done
