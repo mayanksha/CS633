@@ -76,4 +76,5 @@ do
         done
     done
 done
+python3 plot.py cse/
 exit 0
