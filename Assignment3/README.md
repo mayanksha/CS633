@@ -20,7 +20,7 @@ Note that I haven't used the other implementation which uses `MPI_Bcast` followe
 
 For choosing the value of K, I have firstly used my own files `extract_csv.sh` to convert the binary iles into csv data for easier and more pythonic processing. Now, I have used the Average Silhoutte Method and the Elbow method to plot graphs for various values of K. For the first dataset, the elbow method graph is rather smooth and hence it's completely upto us to choose the number of clusters. Hence, I've chosen K = 90 where we can see that the rate of change of derivative of curve is largest. The graph for the first dataset is shown below: 
 
-<img src="kmeans-k-data1.png" alt="Elbow method and average silhoutte score vs the number of K" width=100%></img>
+![Elbow method and average silhoutte score vs the number of K](https://i.imgur.com/upUBANG.png)
 
 One major issue that I faced while plotting these graphs was the fact that the KMeans fitting step in sklearn is extremely slow for the given data1 or data2 sets. Hence, I had to plot these graphs over a span of ~20 hours. Furthermore, to speed up the process, I have used `MiniBatchKMeans` but even then it isn't fast enough so that we can compute the K value optimally for each time step file. As a result of time constraints, I have fixed K value. For the data2 dataset, the value using elbow method comes out to be around 10, and I have chosen 11 as K value for that.
 

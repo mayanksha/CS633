@@ -14,14 +14,17 @@ if (len(sys.argv) != 2):
 data_file_regex = ['./{}/data1/'.format(sys.argv[1]), './{}/data2/'.format(sys.argv[1])]
 
 for file_regex in data_file_regex:
+    if (os.path.isdir(file_regex) == 0):
+        continue
     data_files = glob.glob(file_regex + 'temp_output_*')
-    proc_files = sorted([(int(re.findall('temp_output_(\d+).txt', i)[0]), i) for i in data_files])
+    proc_files = sorted([(int(re.findall('temp_output_(\d+)_.*', i)[0]), i) for i in data_files])
     procs = [i[0] for i in proc_files]
-    print(proc_files)
 
     T, P, PP = [], [], []
     for a in proc_files:
-        f = open(a[1], "r+")
+        print(a)
+        filename = a[1]
+        f = open(filename, "r+")
         data = f.read()
         for i in re.findall('Total: (.*)', data):
             T.append([a[0], float(i)])
@@ -39,7 +42,7 @@ for file_regex in data_file_regex:
 
     fig.subplots_adjust(wspace=0.2)
     for i in range(3):
-        sns.boxplot(x="processes", y="time", data=dfs[i], palette="Set3", ax=ax[i], width=0.4)
+        sns.boxplot(x="processes", y="time", data=dfs[i], palette="Set3", ax=ax[i], width=0.4, showfliers=False)
 
     ax[0].title.set_text('Pre-Processing Time')
     ax[1].title.set_text('Processing Time')
